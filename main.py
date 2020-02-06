@@ -17,6 +17,8 @@ def main():
     snippets = {}
     directory = 'snippets'
 
+    apply_fixes_to_spec()
+
     for resource_name, properties in spec['ResourceTypes'].items():
         # Convert e.g.: AWS::EC2::SpotFleet -> EC2_SpotFleet
         name = '_'.join(resource_name.split('::')[1:])
@@ -44,6 +46,18 @@ def main():
             fh.write(contents)
 
     print("Wrote %d files in directory '%s'." % (len(snippets), directory))
+
+
+def apply_fixes_to_spec():
+    """Some properties reference structures that are 'incomplete'.
+    """
+    item = spec['PropertyTypes']['AWS::EC2::LaunchTemplate.CapacityReservationSpecification']['Properties']['CapacityReservationPreference']
+    item.pop('Type')
+    item['PrimitiveType'] = 'String'
+
+    item = spec['ResourceTypes']['AWS::Transfer::User']['Properties']['SshPublicKeys']
+    item.pop('ItemType')
+    item['PrimitiveItemType'] = 'String'
 
 
 def create_snippet(resource_definition, resource_name, original_resource_name):
@@ -113,7 +127,13 @@ def property_as_str(property_name, property_fields, resource_name, tab_count=1):
         prop_name = '%s.%s' % (resource_name, item_type)
 
     # Recursively process the nested properties
-    for name, fields in sorted(spec['PropertyTypes'][prop_name]['Properties'].items()):
+    props = spec['PropertyTypes'][prop_name]
+
+    # Fix 3: some items may be missing 'Properties' ...
+    if 'Properties' not in props:
+        props['Properties'] = {props['ItemType']: props}
+
+    for name, fields in sorted(props['Properties'].items()):
         definition += property_as_str(name, fields, resource_name, tab_count+1)
 
     if is_list:
