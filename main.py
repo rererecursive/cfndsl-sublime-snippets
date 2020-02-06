@@ -1,24 +1,27 @@
+import json
 import yaml
 
-types = ['String', 'Boolean', 'JSON', 'Integer', 'Number']
+primitive_types = ['String', 'Boolean', 'JSON', 'Integer', 'Number']
 field_count = 1
 
-with open('types.yaml') as fh:
-    contents = yaml.load(fh, Loader=yaml.FullLoader)
+# with open('types.yaml') as fh:
+#     types = yaml.load(fh, Loader=yaml.FullLoader)
 
+with open('resource_specification.json') as fh:
+    spec = json.load(fh)
+    spec['ResourceTypes'] = dict(sorted(spec['ResourceTypes'].items()))
+    spec['PropertyTypes'] = dict(sorted(spec['PropertyTypes'].items()))
 
 def main():
     output = ''
 
-    for resource, properties in contents['Resources'].items():
-        # Convert: AWS::EC2::SpotFleet -> EC2_SpotFleet
-        name = '_'.join(resource.split('::')[1:])
+    for resource_name, properties in spec['ResourceTypes'].items():
+        # Convert e.g.: AWS::EC2::SpotFleet -> EC2_SpotFleet
+        name = '_'.join(resource_name.split('::')[1:])
         output = '%s("${1:name}") do\n' % name
 
-        # (property, type)
-        for prop in properties['Properties'].items():
-            # print("Processing", name, prop)
-            output += field_as_str(prop)
+        for property_name, property_fields in sorted(properties['Properties'].items()):
+            output += property_as_str(property_name, property_fields, resource_name)
 
         output += "end\n"
         global field_count
@@ -26,57 +29,70 @@ def main():
         print(output)
 
 
-def field_as_str(field, tab_count=1):
+def property_as_str(property_name, property_fields, resource_name, tab_count=1):
     """
-    I need a way to process the (key, value) recursively, and to add the appropriate tab width
-    A Field can be:
-      1. Key, Type
-      2. Key, [Type]
-      3. Key, Field
-      4. Key, [Field]
+    A property can be:
+        1. Key, PrimitiveType
+        2. Key, [PrimitiveType]
+        3. Key, ItemType
+        4. Key, [ItemType]
     """
     global field_count
-    field_count += 1
-    is_list = False
-    # print("Field", field)
-    key, value = field
-
-    # 1. Key, Type
-    if value in types:
-        # print("1.")
-        return ('\t' * tab_count) + ('%s ${%d:%s}\n' % (key, field_count, value))
-
-    # 2. Key, [Type]
-    if type(value) == list and value[0] in types:
-        # print("2.")
-        return ('\t' * tab_count) + ('%s [${%d:%s}]\n' % (key, field_count, value[0]))
-
-    # 3. Key, [Field]
-    if type(value) == list:
-        # print("3.")
-        is_list = True
-        value = value[0]
-    # else:
-        # print("4.")
-
-    # 4. Key, Field
-    output = ''
     tc = ('\t' * tab_count)
-    nested_field = contents['Types'][value]
+    is_list = False
+    output = ''
 
-    if type(nested_field) != dict:
-        output += field_as_str((value, nested_field), tab_count+1)
+    if property_fields['Required']:
+        optional = ''
     else:
-        for nf in nested_field.items():
-            output += field_as_str(nf, tab_count+1)
+        optional = ' # Optional'
+
+    # 1. Key, PrimitiveType
+    if 'PrimitiveType' in property_fields:
+        field_count += 1
+        return ('\t' * tab_count) + ('%s ${%d:%s}%s\n' % (property_name, field_count, property_fields['PrimitiveType'], optional))
+
+    # 2. Key, [PrimitiveType]
+    if 'PrimitiveItemType' in property_fields:
+        field_count += 1
+        if property_fields['Type'] == 'List':
+            return ('\t' * tab_count) + ('%s [${%d:%s}]%s\n' % (property_name, field_count, property_fields['PrimitiveItemType'], optional))
+        else:
+            # The same as 1., but with a different key
+            return ('\t' * tab_count) + ('%s ${%d:%s}%s\n' % (property_name, field_count, property_fields['PrimitiveItemType'], optional))
+
+    # 4. Key, [ItemType]
+    if 'Type' in property_fields and property_fields['Type'] in ('List', 'Map'):
+        item_type = property_fields['ItemType']
+
+        if property_fields['Type'] == 'List':
+            is_list = True
+    else:
+        # 3. Key, ItemType
+        item_type = property_fields['Type']
+
+    # Fix 1: for some reason, the EMR docs define this property in a recursive way. Ignore it.
+    if property_name == 'Configurations' and item_type == 'Configuration':
+        field_count += 1
+        return ('\t' * tab_count) + ('%s [${%d:%s}]%s\n' % (property_name, field_count, item_type, optional))
+
+    # Fix 2: the spec's types all begin with "AWS::" except for "Tag" ...
+    if item_type == 'Tag':
+        prop_name = 'Tag'
+    else:
+        prop_name = '%s.%s' % (resource_name, item_type)
+
+    # Recursively process the nested properties
+    for name, fields in sorted(spec['PropertyTypes'][prop_name]['Properties'].items()):
+        output += property_as_str(name, fields, resource_name, tab_count+1)
 
     if is_list:
-        return tc + ('%s [{\n%s\n%s}]\n' % (key, output, tc))
-        # return tc + ('%s [{%s}]\n' % (key, output))
+        return tc + ('%s [{%s\n%s\n%s}]\n' % (property_name, optional, output.rstrip(), tc))
     else:
-        return tc + ('%s {\n%s\n%s}\n' % (key, output, tc))
+        return tc + ('%s {%s\n%s\n%s}\n' % (property_name, optional, output.rstrip(), tc))
 
 
 main()
 
 # TODO: get the max length of each line for formatting purposes (i.e. printing '# Optional')
+# TODO: provide a link to the AWS docs on hover
