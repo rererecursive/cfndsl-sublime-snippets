@@ -1,32 +1,62 @@
 import json
+import os
 import yaml
 
 primitive_types = ['String', 'Boolean', 'JSON', 'Integer', 'Number']
 field_count = 1
-
-# with open('types.yaml') as fh:
-#     types = yaml.load(fh, Loader=yaml.FullLoader)
 
 with open('resource_specification.json') as fh:
     spec = json.load(fh)
     spec['ResourceTypes'] = dict(sorted(spec['ResourceTypes'].items()))
     spec['PropertyTypes'] = dict(sorted(spec['PropertyTypes'].items()))
 
+print("Collected %d resources." % len(spec['ResourceTypes']))
+
 def main():
-    output = ''
+    definition = ''
+    snippets = {}
+    directory = 'snippets'
 
     for resource_name, properties in spec['ResourceTypes'].items():
         # Convert e.g.: AWS::EC2::SpotFleet -> EC2_SpotFleet
         name = '_'.join(resource_name.split('::')[1:])
-        output = '%s("${1:name}") do\n' % name
+        definition = '%s("${1:name}") do\n' % name
 
         for property_name, property_fields in sorted(properties['Properties'].items()):
-            output += property_as_str(property_name, property_fields, resource_name)
+            definition += property_as_str(property_name, property_fields, resource_name)
 
-        output += "end\n"
+        definition += "end\n"
         global field_count
         field_count = 1
-        print(output)
+
+        snippets[name] = create_snippet(definition, name, resource_name)
+
+    print("Collected %d snippets." % len(snippets))
+
+    try:
+        os.makedirs(directory)
+    except FileExistsError:
+        # Directory already exists
+        pass
+
+    for filename, contents in snippets.items():
+        with open(directory + '/' + filename + '.sublime-snippet', 'w') as fh:
+            fh.write(contents)
+
+    print("Wrote %d files in directory '%s'." % (len(snippets), directory))
+
+
+def create_snippet(resource_definition, resource_name, original_resource_name):
+    return """
+<snippet>
+\t<description>    %s</description>
+\t<tabTrigger>%s</tabTrigger>
+\t<scope> source.ruby </scope>
+<content><![CDATA[
+%s
+]]></content>
+</snippet>
+""".strip() % (original_resource_name, resource_name, resource_definition.strip())
 
 
 def property_as_str(property_name, property_fields, resource_name, tab_count=1):
@@ -40,7 +70,7 @@ def property_as_str(property_name, property_fields, resource_name, tab_count=1):
     global field_count
     tc = ('\t' * tab_count)
     is_list = False
-    output = ''
+    definition = ''
 
     if property_fields['Required']:
         optional = ''
@@ -84,12 +114,12 @@ def property_as_str(property_name, property_fields, resource_name, tab_count=1):
 
     # Recursively process the nested properties
     for name, fields in sorted(spec['PropertyTypes'][prop_name]['Properties'].items()):
-        output += property_as_str(name, fields, resource_name, tab_count+1)
+        definition += property_as_str(name, fields, resource_name, tab_count+1)
 
     if is_list:
-        return tc + ('%s [{%s\n%s\n%s}]\n' % (property_name, optional, output.rstrip(), tc))
+        return tc + ('%s [{%s\n%s\n%s}]\n' % (property_name, optional, definition.rstrip(), tc))
     else:
-        return tc + ('%s {%s\n%s\n%s}\n' % (property_name, optional, output.rstrip(), tc))
+        return tc + ('%s {%s\n%s\n%s}\n' % (property_name, optional, definition.rstrip(), tc))
 
 
 main()
