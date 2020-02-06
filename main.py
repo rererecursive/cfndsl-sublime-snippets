@@ -21,6 +21,7 @@ def main():
         # Convert e.g.: AWS::EC2::SpotFleet -> EC2_SpotFleet
         name = '_'.join(resource_name.split('::')[1:])
         definition = '%s("${1:name}") do\n' % name
+        definition += '\t# %s\n' % properties['Documentation']
 
         for property_name, property_fields in sorted(properties['Properties'].items()):
             definition += property_as_str(property_name, property_fields, resource_name)
@@ -36,8 +37,7 @@ def main():
     try:
         os.makedirs(directory)
     except FileExistsError:
-        # Directory already exists
-        pass
+        pass # Directory already exists
 
     for filename, contents in snippets.items():
         with open(directory + '/' + filename + '.sublime-snippet', 'w') as fh:
