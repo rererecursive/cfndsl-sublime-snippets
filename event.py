@@ -12,11 +12,9 @@ class CfndslListener(sublime_plugin.EventListener):
         attributes = {}
 
         # Function pop-up
-        if selected_word in [
-                'Condition', 'FnAnd', 'FnBase64', 'FnCidr', 'FnEquals',
-                'FnFindInMap', 'FnGetAtt', 'FnGetAZs', 'FnIf', 'FnImportValue',
-                'FnJoin', 'FnNot', 'FnOr', 'FnSelect', 'FnSplit', 'FnSub']:
-            directory = os.path.dirname(os.path.realpath(__file__)) + '/fn-snippets'
+        directory = os.path.dirname(os.path.realpath(__file__)) + '/fn-snippets'
+
+        if filename in os.listdir(directory):
             doc = minidom.parse(directory + '/' + filename)
             url = doc.getElementsByTagName('url')[0].firstChild.nodeValue.strip()
             example = doc.getElementsByTagName('example')[0].firstChild.nodeValue.strip()
