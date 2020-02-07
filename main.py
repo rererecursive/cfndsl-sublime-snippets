@@ -32,7 +32,8 @@ def main():
         global field_count
         field_count = 1
 
-        snippets[name] = create_snippet(definition, name, resource_name)
+        attributes = get_attributes_as_str(resource_name)
+        snippets[name] = create_snippet(definition, name, resource_name, attributes)
 
     print("Collected %d snippets." % len(snippets))
 
@@ -48,6 +49,25 @@ def main():
     print("Wrote %d files in directory '%s'." % (len(snippets), directory))
 
 
+def get_attributes_as_str(resource_name):
+    attributes = ''
+    resource = spec['ResourceTypes'][resource_name]
+
+    if 'Attributes' in resource:
+        for attribute, types in sorted(resource['Attributes'].items()):
+            # Attributes are either: 'PrimitiveType' or 'Type,PrimitiveItemType'
+            if 'PrimitiveType' in types:
+                attr_type = types['PrimitiveType']
+            else:
+                if types['Type'] != 'List':
+                    print("AH", resource_name)
+                    exit(1)
+                attr_type = '[%s]' % types['PrimitiveItemType']
+
+            attributes += '\t\t<attribute name="%s" type="%s"></attribute>\n' % (attribute, attr_type)
+
+    return attributes.rstrip()
+
 def apply_fixes_to_spec():
     """Some properties reference structures that are 'incomplete'.
     """
@@ -60,7 +80,7 @@ def apply_fixes_to_spec():
     item['PrimitiveItemType'] = 'String'
 
 
-def create_snippet(resource_definition, resource_name, original_resource_name):
+def create_snippet(resource_definition, resource_name, original_resource_name, attributes):
     return """
 <snippet>
 \t<description>    %s</description>
@@ -69,8 +89,11 @@ def create_snippet(resource_definition, resource_name, original_resource_name):
 <content><![CDATA[
 %s
 ]]></content>
+\t<attributes>
+%s
+\t</attributes>
 </snippet>
-""".strip() % (original_resource_name, resource_name, resource_definition.strip())
+""".strip() % (original_resource_name, resource_name, resource_definition.strip(), attributes)
 
 
 def property_as_str(property_name, property_fields, resource_name, tab_count=1):
