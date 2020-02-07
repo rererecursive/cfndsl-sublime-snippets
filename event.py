@@ -7,8 +7,9 @@ from xml.dom import minidom
 class CfndslListener(sublime_plugin.EventListener):
     def on_hover(self, view, point, hover_zone):
         selected_word = view.substr(view.word(point))
+
         filename = '%s.sublime-snippet' % selected_word
-        directory = '/home/professor/.config/sublime-text-3/Packages/User/snippets'
+        directory = os.path.dirname(os.path.realpath(__file__)) + '/snippets'
         attributes = {}
 
         if filename in os.listdir(directory):
@@ -23,9 +24,9 @@ class CfndslListener(sublime_plugin.EventListener):
 
         #print("attrs:", attributes)
         if attributes:
-            self.show_popup(view, attributes, selected_word)
+            self.show_popup(view, point, attributes, selected_word)
 
-    def show_popup(self, view, resource_attributes, resource_name):
+    def show_popup(self, view, point, resource_attributes, resource_name):
         text = '<b><u>%s</u></b><br>' % resource_name
         text += '<b>Outputs:</b><br>'
 
@@ -45,6 +46,6 @@ class CfndslListener(sublime_plugin.EventListener):
                 spaces = ' '
             text += ' %s%s<i>%s</i><br>' % (attr_name, spaces, attr_type)
 
-        # TODO: show the popup on the line below the hovered line
-        view.show_popup(text, on_navigate=print)
-        #, <flags>, <location>, <max_width>, <max_height>, <on_navigate>, <on_hide>):
+        # Display the popup on the line below the cursor
+        (row, col) = view.rowcol(point)
+        view.show_popup(text, on_navigate=print, location=view.text_point(row+1,col))
