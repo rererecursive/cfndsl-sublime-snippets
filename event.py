@@ -48,4 +48,4 @@ class CfndslListener(sublime_plugin.EventListener):
 
         # Display the popup on the line below the cursor
         (row, col) = view.rowcol(point)
-        view.show_popup(text, on_navigate=print, location=view.text_point(row+1,col))
+        view.show_popup(text, on_navigate=print, location=view.text_point(row,col))
