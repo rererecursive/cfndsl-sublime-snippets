@@ -1,0 +1,14 @@
+<snippet>
+    <description>    FnOr(...)</description>
+    <tabTrigger>FnOr</tabTrigger>
+    <scope> source.ruby </scope>
+<content><![CDATA[
+FnOr(["${1:Value1}", "${2:Value2}"])
+]]></content>
+    <url>
+        https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-conditions.html#intrinsic-function-reference-conditions-or
+    </url>
+    <example>
+        FnOr(FnEquals(...), FnNot(...))
+    </example>
+</snippet>

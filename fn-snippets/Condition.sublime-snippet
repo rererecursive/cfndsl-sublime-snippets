@@ -1,0 +1,13 @@
+<snippet>
+    <description>    Condition(...)</description>
+    <tabTrigger>Condition</tabTrigger>
+    <scope> source.ruby </scope>
+<content><![CDATA[
+Condition("${1:Name}", "${2:Boolean}")
+]]></content>
+    <url>https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/conditions-section-structure.html
+    </url>
+    <example>
+        FnAnd(FnEquals(...), FnNot(...))
+    </example>
+</snippet>

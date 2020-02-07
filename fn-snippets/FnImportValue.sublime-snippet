@@ -1,0 +1,14 @@
+<snippet>
+    <description>    FnImportValue(...)</description>
+    <tabTrigger>FnImportValue</tabTrigger>
+    <scope> source.ruby </scope>
+<content><![CDATA[
+FnImportValue("${1:Value}")
+]]></content>
+    <url>
+        https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-importvalue
+    </url>
+    <example>
+        FnImportValue(FnSub('${Env}-VpcId'))
+    </example>
+</snippet>

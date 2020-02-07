@@ -1,0 +1,14 @@
+<snippet>
+    <description>    FnFindInMap(...)</description>
+    <tabTrigger>FnFindInMap</tabTrigger>
+    <scope> source.ruby </scope>
+<content><![CDATA[
+FnFindInMap("${1:MapName}", "${2:Key}", "${3:Value}")
+]]></content>
+    <url>
+        https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-findinmap
+    </url>
+    <example>
+        FnFindInMap('Sizes', Ref('Env'), 'DB')
+    </example>
+</snippet>

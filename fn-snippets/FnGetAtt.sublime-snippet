@@ -1,0 +1,14 @@
+<snippet>
+    <description>    FnGetAtt(...)</description>
+    <tabTrigger>FnGetAtt</tabTrigger>
+    <scope> source.ruby </scope>
+<content><![CDATA[
+FnGetAtt("${1:LogicalResourceName}", "${2:Attribute}")
+]]></content>
+    <url>
+        https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-getatt
+    </url>
+    <example>
+        FnGetAtt('MyInstance', 'PublicIp')
+    </example>
+</snippet>

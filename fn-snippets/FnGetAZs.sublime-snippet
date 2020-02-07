@@ -1,0 +1,14 @@
+<snippet>
+    <description>    FnGetAZs(...)</description>
+    <tabTrigger>FnGetAZs</tabTrigger>
+    <scope> source.ruby </scope>
+<content><![CDATA[
+FnGetAZs("${1:Region}")
+]]></content>
+    <url>
+        https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-getavailabilityzones
+    </url>
+    <example>
+        FnGetAZs('us-east-1')
+    </example>
+</snippet>

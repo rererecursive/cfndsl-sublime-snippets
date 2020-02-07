@@ -1,0 +1,15 @@
+<snippet>
+    <description>    FnSub(...)</description>
+    <tabTrigger>FnSub</tabTrigger>
+    <scope> source.ruby </scope>
+<content><![CDATA[
+FnSub("${1:String}")
+]]></content>
+    <url>
+        https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-sub
+    </url>
+    <example>
+        FnSub('${AWS::AccountId')
+        FnSub('${my_var}', my_var: 'hello', ...)
+    </example>
+</snippet>

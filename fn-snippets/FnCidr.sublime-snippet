@@ -1,0 +1,14 @@
+<snippet>
+    <description>    FnCidr(...)</description>
+    <tabTrigger>FnCidr</tabTrigger>
+    <scope> source.ruby </scope>
+<content><![CDATA[
+FnCidr("${1:IpBlock}", "${2:Count}", "${3:CidrBits}")
+]]></content>
+    <url>
+        https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-cidr
+    </url>
+    <example>
+        FnCidr('0.0.0.0/24', '6', '5')
+    </example>
+</snippet>

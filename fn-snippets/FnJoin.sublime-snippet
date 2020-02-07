@@ -1,0 +1,14 @@
+<snippet>
+    <description>    FnJoin(...)</description>
+    <tabTrigger>FnJoin</tabTrigger>
+    <scope> source.ruby </scope>
+<content><![CDATA[
+FnJoin("${1:String}", ["${2:Value1}", "${3:Value2}"])
+]]></content>
+    <url>
+        https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-join
+    </url>
+    <example>
+        FnJoin('/', [Ref('MyIp'), Ref('MyRange')])
+    </example>
+</snippet>

@@ -1,0 +1,15 @@
+<snippet>
+    <description>    FnIf(...)</description>
+    <tabTrigger>FnIf</tabTrigger>
+    <scope> source.ruby </scope>
+<content><![CDATA[
+FnIf("${1:ConditionName}", "${2:TrueValue}", "${3:FalseValue}")
+]]></content>
+    <url>
+        https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-conditions.html#intrinsic-function-reference-conditions-if
+    </url>
+    <example>
+        Condition('MyCond', ...)
+        FnIf('MyCond', 'Enable', 'Disable')
+    </example>
+</snippet>

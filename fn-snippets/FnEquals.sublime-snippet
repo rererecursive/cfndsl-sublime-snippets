@@ -1,0 +1,14 @@
+<snippet>
+    <description>    FnEquals(...)</description>
+    <tabTrigger>FnEquals</tabTrigger>
+    <scope> source.ruby </scope>
+<content><![CDATA[
+FnEquals("${1:Value1}", "${2:Value2}")
+]]></content>
+    <url>
+        https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-conditions.html#intrinsic-function-reference-conditions-equals
+    </url>
+    <example>
+       FnEquals('123456', Ref('Price'))
+    </example>
+</snippet>

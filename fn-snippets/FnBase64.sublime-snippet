@@ -1,0 +1,14 @@
+<snippet>
+    <description>    FnBase64(...)</description>
+    <tabTrigger>FnBase64</tabTrigger>
+    <scope> source.ruby </scope>
+<content><![CDATA[
+FnBase64("${1:Value}")
+]]></content>
+    <url>
+        https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-base64
+    </url>
+    <example>
+        FnBase64('Hello there')
+    </example>
+</snippet>

@@ -1,0 +1,14 @@
+<snippet>
+    <description>    FnSelect(...)</description>
+    <tabTrigger>FnSelect</tabTrigger>
+    <scope> source.ruby </scope>
+<content><![CDATA[
+FnSelect("${1:Index}", ["${2:Value1}", "${3:Value2}"])
+]]></content>
+    <url>
+        https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-select
+    </url>
+    <example>
+        FnSelect('1', FnSplit(...))
+    </example>
+</snippet>
